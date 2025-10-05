@@ -18,6 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 const FormSchema = z.object({
   location: z.string().min(3, {
     message: 'Location must be at least 3 characters.',
+  }).max(500, {
+    message: 'Location must be less than 500 characters.',
   }),
   date: z.date({
     required_error: 'A date is required.',
