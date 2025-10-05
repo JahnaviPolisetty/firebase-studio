@@ -16,8 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
-  location: z.string().min(2, {
-    message: 'Location must be at least 2 characters.',
+  location: z.string().min(3, {
+    message: 'Location must be at least 3 characters.',
   }),
   date: z.date({
     required_error: 'A date is required.',
