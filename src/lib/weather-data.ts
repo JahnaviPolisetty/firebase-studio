@@ -37,8 +37,8 @@ export const getWeatherData = async (location: string, date: Date): Promise<Weat
     if (!validateCoordinates(lat, lon)) {
       throw new Error('Please enter a valid location. Latitude must be between -90 and 90, and longitude between -180 and 180.');
     }
-  } else if (location.toLowerCase() === 'error') {
-     throw new Error('Could not fetch weather data for the specified location.');
+  } else if (location.toLowerCase() === 'error' || location.toLowerCase() === 'invalid') {
+     throw new Error('Please enter a valid input');
   }
 
 
