@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "eco-flora",
+      "description": "A close-up of a blooming flower in a local park, representing the area's native flora.",
+      "imageUrl": "https://images.unsplash.com/photo-1686454116831-05e1bbe04ee7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmbG93ZXIlMjBwbGFudHxlbnwwfHx8fDE3NTk2NDQ1OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flower plant"
+    },
+    {
+      "id": "eco-fauna",
+      "description": "A small bird perched on a branch, showcasing local wildlife.",
+      "imageUrl": "https://images.unsplash.com/photo-1679461984673-cd2fe3fd297b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiaXJkJTIwYW5pbWFsfGVufDB8fHx8MTc1OTY0NDU5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bird animal"
+    }
+  ]
 }
