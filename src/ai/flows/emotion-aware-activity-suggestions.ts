@@ -8,7 +8,7 @@
  * - EmotionAwareActivityOutput - The return type for the suggestOutdoorActivities function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai} from '@/ai/genkit-instance';
 import {z} from 'genkit';
 
 const EmotionAwareActivityInputSchema = z.object({

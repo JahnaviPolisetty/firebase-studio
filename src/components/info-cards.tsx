@@ -8,6 +8,8 @@ import type { WeatherData } from '@/lib/types';
 import { useEffect, useState, useTransition } from 'react';
 import { Skeleton } from './ui/skeleton';
 import { ecoAwareness } from '@/ai/flows/eco-awareness';
+import { isApiKeySet } from '@/ai/genkit';
+import { useToast } from '@/hooks/use-toast';
 
 const glassmorphismStyle = "bg-card/30 backdrop-blur-sm border border-white/20 shadow-lg text-white";
 
@@ -20,16 +22,33 @@ const InfoCards = ({ weatherData }: InfoCardsProps) => {
   const faunaImage = PlaceHolderImages.find(img => img.id === 'eco-fauna');
   const [ecoData, setEcoData] = useState<{ flora: string; fauna: string; tip: string } | null>(null);
   const [isAiLoading, startAiTransition] = useTransition();
-
+  const { toast } = useToast();
 
   useEffect(() => {
     if (weatherData.location) {
       startAiTransition(async () => {
-        const data = await ecoAwareness({ location: weatherData.location });
-        setEcoData(data);
+        if (!(await isApiKeySet())) {
+          // The API key is not set, so we can't call the AI flow.
+          // The other component (AiAssistant) will show a toast.
+          // We can just set a default state here.
+          setEcoData({flora: 'AI not configured.', fauna: 'AI not configured.', tip: 'Please contact an admin.'});
+          return;
+        }
+
+        try {
+          const data = await ecoAwareness({ location: weatherData.location });
+          setEcoData(data);
+        } catch (error) {
+          console.error("Eco Awareness Error:", error);
+           toast({
+            variant: "destructive",
+            title: "AI Assistant Error",
+            description: "Could not generate eco awareness information.",
+          });
+        }
       });
     }
-  }, [weatherData.location]);
+  }, [weatherData.location, toast]);
 
 
   const getAdventureScore = () => {
@@ -44,7 +63,7 @@ const InfoCards = ({ weatherData }: InfoCardsProps) => {
   const getScoreMessage = (score: number) => {
     if (score > 80) return "Weather-Perfect!";
     if (score > 60) return "Great Day for it!";
-    if (score > 40) return "Be Prepared!";
+    if (score > 40) return "Risky Venture!";
     return "Risky Venture!";
   }
 

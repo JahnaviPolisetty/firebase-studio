@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import type { WeatherData } from "@/lib/types";
 import { clothingAndSafetyRecommendations } from "@/ai/flows/clothing-and-safety-recommendations";
 import { suggestOutdoorActivities } from "@/ai/flows/emotion-aware-activity-suggestions";
+import { isApiKeySet } from "@/ai/genkit";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +27,17 @@ const AiAssistant = ({ weatherData }: AiAssistantProps) => {
   useEffect(() => {
     if (weatherData && emotion) {
       startAiTransition(async () => {
+        if (!(await isApiKeySet())) {
+          toast({
+            variant: 'destructive',
+            title: 'AI Service Unavailable',
+            description: 'The API key for the AI service is not configured. Please set GEMINI_API_KEY in your environment.',
+          });
+          setActivitySuggestion({suggestedActivity: 'AI is not configured.', reasoning: 'Please contact the administrator.'});
+          setClothingRecs({clothingRecommendations: ['N/A'], safetyRecommendations: ['N/A']});
+          return;
+        }
+
         try {
           const clothingInput = {
             temperature: weatherData.temperature,

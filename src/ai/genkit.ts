@@ -1,7 +1,7 @@
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+'use server';
 
-export const ai = genkit({
-  plugins: [googleAI()],
-  model: 'googleai/gemini-2.5-flash',
-});
+import { getApiKey } from './genkit-instance';
+
+export async function isApiKeySet() {
+  return !!getApiKey();
+}
