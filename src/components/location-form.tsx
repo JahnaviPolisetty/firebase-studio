@@ -16,8 +16,10 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
-  location: z.string().trim().min(1, {
+  location: z.string().trim().min(3, {
     message: 'Please enter a valid location.',
+  }).max(500, {
+    message: 'Location must be 500 characters or less.',
   }),
   date: z.date({
     required_error: 'A date is required.',
@@ -58,9 +60,9 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
         },
         (error) => {
           setIsGeolocating(false);
-          let description = "Could not retrieve your location. Please ensure location services are enabled.";
+          let description = "Could not retrieve your location. Please ensure location services are enabled in your browser.";
           if (error.code === error.PERMISSION_DENIED) {
-            description = "Geolocation permission denied. Please enable it in your browser settings.";
+            description = "Geolocation permission denied. Please enable it in your browser settings to use this feature.";
           }
           toast({
             variant: "destructive",

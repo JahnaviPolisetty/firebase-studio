@@ -31,6 +31,12 @@ export const getWeatherData = async (location: string, date: Date): Promise<Weat
     throw new Error('Please enter a valid location.');
   }
 
+  // Check for random, nonsensical strings that are unlikely to be real places.
+  // This is a mock validation. A real app would use a geocoding API.
+  if (!location.includes(',') && location.length < 3) {
+      throw new Error('Please enter a valid location.');
+  }
+
   const coords = location.split(',').map(s => parseFloat(s.trim()));
   if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
     const [lat, lon] = coords;
