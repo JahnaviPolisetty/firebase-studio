@@ -33,7 +33,6 @@ export default function Home() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
-      // Do not show a toast here to avoid redundancy with the inline error message
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +86,7 @@ export default function Home() {
           </div>
         )}
 
-        {weatherData && (
+        {weatherData && !error && (
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="col-span-1 md:col-span-2 lg:col-span-4">
               <WeatherDisplay weatherData={weatherData} />

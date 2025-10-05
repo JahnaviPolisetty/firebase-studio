@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -16,10 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
-  location: z.string().min(1, {
+  location: z.string().trim().min(1, {
     message: 'Please enter a valid location.',
-  }).max(500, {
-    message: 'Location must be less than 500 characters.',
   }),
   date: z.date({
     required_error: 'A date is required.',
@@ -43,16 +41,7 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
     mode: 'onChange',
   });
 
-  const locationValue = useWatch({
-    control: form.control,
-    name: 'location'
-  });
-
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!data.location) {
-        form.setError("location", { type: "manual", message: "Please enter a valid location." });
-        return;
-    }
     onSearch(data.location, data.date);
   }
 
@@ -88,8 +77,8 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
       });
     }
   };
-
-  const isSearchDisabled = isLoading || isGeolocating || !locationValue;
+  
+  const { isValid } = form.formState;
 
   return (
     <div className="rounded-lg bg-card/30 p-4 backdrop-blur-sm border border-white/20 shadow-lg">
@@ -161,7 +150,7 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
           <Button
             type="submit"
             className="h-12 text-lg w-full md:w-auto bg-primary hover:bg-primary/90"
-            disabled={isSearchDisabled}
+            disabled={isLoading || isGeolocating || !isValid}
           >
             <Search className="mr-2 size-5" />
             {isLoading ? 'Searching...' : 'Search'}
