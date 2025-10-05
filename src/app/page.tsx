@@ -92,7 +92,7 @@ export default function Home() {
                <AiAssistant weatherData={weatherData} />
             </div>
              <div className="col-span-1 md:col-span-2 lg:col-span-4">
-              <InfoCards />
+              <InfoCards weatherData={weatherData} />
             </div>
           </div>
         )}

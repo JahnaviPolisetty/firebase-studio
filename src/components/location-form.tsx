@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, MapPin, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Search, LocateFixed } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
   location: z.string().min(2, {
@@ -29,6 +30,7 @@ type LocationFormProps = {
 };
 
 const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -40,6 +42,33 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     onSearch(data.location, data.date);
   }
+
+  const handleCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationString = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          form.setValue('location', locationString);
+          onSearch(locationString, form.getValues('date'));
+        },
+        () => {
+          toast({
+            variant: "destructive",
+            title: "Geolocation Error",
+            description: "Could not retrieve your location. Please ensure location services are enabled.",
+          });
+        }
+      );
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Geolocation Not Supported",
+        description: "Your browser does not support geolocation.",
+      });
+    }
+  };
+
 
   return (
     <div className="rounded-lg bg-card/30 p-4 backdrop-blur-sm border border-white/20 shadow-lg">
@@ -98,6 +127,16 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
               </FormItem>
             )}
           />
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 text-lg w-full md:w-auto"
+            onClick={handleCurrentLocation}
+            disabled={isLoading}
+          >
+            <LocateFixed className="mr-2 size-5" />
+            Use Current Location
+          </Button>
           <Button
             type="submit"
             className="h-12 text-lg w-full md:w-auto bg-primary hover:bg-primary/90"
