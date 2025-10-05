@@ -53,6 +53,7 @@ export const getWeatherData = async (location: string, date: Date): Promise<Weat
   const baseTemp = 5 + random() * 25; // Base temperature between 5 and 30
 
   return {
+    location,
     temperature: Math.round(baseTemp),
     humidity: Math.floor(random() * 70) + 30, // 30-100%
     windSpeed: Math.floor(random() * 40),

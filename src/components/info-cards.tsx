@@ -1,9 +1,13 @@
+"use client";
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Leaf, Mountain, Siren } from 'lucide-react';
 import type { WeatherData } from '@/lib/types';
+import { useEffect, useState, useTransition } from 'react';
+import { Skeleton } from './ui/skeleton';
+import { ecoAwareness } from '@/ai/flows/eco-awareness';
 
 const glassmorphismStyle = "bg-card/30 backdrop-blur-sm border border-white/20 shadow-lg text-white";
 
@@ -14,6 +18,19 @@ type InfoCardsProps = {
 const InfoCards = ({ weatherData }: InfoCardsProps) => {
   const floraImage = PlaceHolderImages.find(img => img.id === 'eco-flora');
   const faunaImage = PlaceHolderImages.find(img => img.id === 'eco-fauna');
+  const [ecoData, setEcoData] = useState<{ flora: string; fauna: string; tip: string } | null>(null);
+  const [isAiLoading, startAiTransition] = useTransition();
+
+
+  useEffect(() => {
+    if (weatherData.location) {
+      startAiTransition(async () => {
+        const data = await ecoAwareness({ location: weatherData.location });
+        setEcoData(data);
+      });
+    }
+  }, [weatherData.location]);
+
 
   const getAdventureScore = () => {
     let score = 100;
@@ -57,7 +74,7 @@ const InfoCards = ({ weatherData }: InfoCardsProps) => {
                   className="rounded-md object-cover"
                   data-ai-hint={floraImage.imageHint}
                 />
-                <p className="text-xs mt-1 text-white/70">Local Flora</p>
+                {isAiLoading ? <Skeleton className="h-4 w-2/3 mt-2" /> : <p className="text-xs mt-1 text-white/70">{ecoData?.flora}</p>}
               </div>
             )}
             {faunaImage && (
@@ -70,11 +87,18 @@ const InfoCards = ({ weatherData }: InfoCardsProps) => {
                   className="rounded-md object-cover"
                   data-ai-hint={faunaImage.imageHint}
                 />
-                 <p className="text-xs mt-1 text-white/70">Local Fauna</p>
+                 {isAiLoading ? <Skeleton className="h-4 w-2/3 mt-2" /> : <p className="text-xs mt-1 text-white/70">{ecoData?.fauna}</p>}
               </div>
             )}
           </div>
-          <p className="text-sm text-white/90">Eco Tip: Remember to leave no trace. Pack out everything you pack in to keep trails beautiful.</p>
+           {isAiLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+               <Skeleton className="h-4 w-3/4" />
+            </div>
+           ) : (
+            <p className="text-sm text-white/90">Eco Tip: {ecoData?.tip}</p>
+           )}
         </CardContent>
       </Card>
 
