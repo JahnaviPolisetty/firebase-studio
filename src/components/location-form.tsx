@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -16,8 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
-  location: z.string().min(3, {
-    message: 'Location must be at least 3 characters.',
+  location: z.string().min(1, {
+    message: 'Please enter a valid location.',
   }).max(500, {
     message: 'Location must be less than 500 characters.',
   }),
@@ -33,32 +33,50 @@ type LocationFormProps = {
 
 const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
   const { toast } = useToast();
+  const [isGeolocating, setIsGeolocating] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       location: '',
       date: new Date(),
     },
+    mode: 'onChange',
+  });
+
+  const locationValue = useWatch({
+    control: form.control,
+    name: 'location'
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!data.location) {
+        form.setError("location", { type: "manual", message: "Please enter a valid location." });
+        return;
+    }
     onSearch(data.location, data.date);
   }
 
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
+      setIsGeolocating(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const locationString = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          form.setValue('location', locationString);
+          form.setValue('location', locationString, { shouldValidate: true });
           onSearch(locationString, form.getValues('date'));
+          setIsGeolocating(false);
         },
-        () => {
+        (error) => {
+          setIsGeolocating(false);
+          let description = "Could not retrieve your location. Please ensure location services are enabled.";
+          if (error.code === error.PERMISSION_DENIED) {
+            description = "Geolocation permission denied. Please enable it in your browser settings.";
+          }
           toast({
             variant: "destructive",
-            title: "Geolocation Error",
-            description: "Could not retrieve your location. Please ensure location services are enabled.",
+            title: "Unable to fetch current location",
+            description,
           });
         }
       );
@@ -71,6 +89,7 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
     }
   };
 
+  const isSearchDisabled = isLoading || isGeolocating || !locationValue;
 
   return (
     <div className="rounded-lg bg-card/30 p-4 backdrop-blur-sm border border-white/20 shadow-lg">
@@ -134,15 +153,15 @@ const LocationForm = ({ onSearch, isLoading }: LocationFormProps) => {
             variant="outline"
             className="h-12 text-lg w-full md:w-auto"
             onClick={handleCurrentLocation}
-            disabled={isLoading}
+            disabled={isLoading || isGeolocating}
           >
             <LocateFixed className="mr-2 size-5" />
-            Use Current Location
+            {isGeolocating ? 'Fetching...' : 'Use Current Location'}
           </Button>
           <Button
             type="submit"
             className="h-12 text-lg w-full md:w-auto bg-primary hover:bg-primary/90"
-            disabled={isLoading}
+            disabled={isSearchDisabled}
           >
             <Search className="mr-2 size-5" />
             {isLoading ? 'Searching...' : 'Search'}

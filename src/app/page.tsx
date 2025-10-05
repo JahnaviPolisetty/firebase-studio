@@ -33,11 +33,7 @@ export default function Home() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
       setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Search Error",
-        description: errorMessage,
-      });
+      // Do not show a toast here to avoid redundancy with the inline error message
     } finally {
       setIsLoading(false);
     }
