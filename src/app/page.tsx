@@ -12,21 +12,32 @@ import InfoCards from "@/components/info-cards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Sparkles, CloudOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSearch = async (location: string, date: Date) => {
     setIsLoading(true);
     setError(null);
     setWeatherData(null);
     try {
+      if (!location) {
+        throw new Error("Please enter a valid location.");
+      }
       const data = await getWeatherData(location, date);
       setWeatherData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred");
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Search Error",
+        description: errorMessage,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +83,7 @@ export default function Home() {
           </div>
         )}
 
-        {error && (
+        {error && !isLoading && (
           <div className="mt-12 flex flex-col items-center justify-center text-center text-destructive-foreground/80">
             <CloudOff className="size-16" />
             <h2 className="mt-4 text-2xl font-bold">Failed to Fetch Weather</h2>

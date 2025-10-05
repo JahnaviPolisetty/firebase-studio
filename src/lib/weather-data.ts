@@ -22,11 +22,15 @@ const validateCoordinates = (lat: number, lon: number) => {
   return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 };
 
-// Mock function to simulate fetching weather data from NASA APIs
+// Mock function to simulate fetching weather data
 export const getWeatherData = async (location: string, date: Date): Promise<WeatherData> => {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 1500));
   
+  if (!location) {
+    throw new Error('Please enter a valid location.');
+  }
+
   const coords = location.split(',').map(s => parseFloat(s.trim()));
   if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
     const [lat, lon] = coords;
@@ -35,9 +39,6 @@ export const getWeatherData = async (location: string, date: Date): Promise<Weat
     }
   } else if (location.toLowerCase() === 'error') {
      throw new Error('Could not fetch weather data for the specified location.');
-  } else if (!/^[a-zA-Z\s,]+$/.test(location)) {
-    // Basic check for city name format
-     throw new Error('Please enter a valid location.');
   }
 
 
